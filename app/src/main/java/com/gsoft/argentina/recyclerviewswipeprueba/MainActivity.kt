@@ -1,13 +1,16 @@
 package com.gsoft.argentina.recyclerviewswipeprueba
 
 import android.content.DialogInterface
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -43,8 +46,8 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.adapter = recyclerAdaptador
 
-        val itemTouchHelper = ItemTouchHelper(simpleCallback)
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+        //val itemTouchHelper = ItemTouchHelper(simpleCallback)
+        //itemTouchHelper.attachToRecyclerView(recyclerView)
 
         val agregar : FloatingActionButton = findViewById(R.id.b_add)
 
@@ -70,10 +73,72 @@ class MainActivity : AppCompatActivity() {
             builder.show()
         }
 
+///////////////////////////// coso de botones ///////////////////////
+        object : SwipeHelper(this, recyclerView, false) {
+
+            override fun instantiateUnderlayButton(
+                    viewHolder: RecyclerView.ViewHolder?,
+                    underlayButtons: MutableList<UnderlayButton>?
+            ) {
+                // Archive Button
+                underlayButtons?.add(SwipeHelper.UnderlayButton(
+                        "Eliminar",
+                        AppCompatResources.getDrawable(
+                                this@MainActivity,
+                                R.drawable.ic_delete
+                        ),
+                        Color.parseColor("#FF0000"), Color.parseColor("#ffffff"),
+                        UnderlayButtonClickListener { pos: Int ->
+                            lista.removeAt(pos);
+                            recyclerAdaptador.notifyItemRemoved(pos)
+                        }
+
+                ))
+
+
+                underlayButtons?.add(SwipeHelper.UnderlayButton(
+                        "Editar",
+                        AppCompatResources.getDrawable(
+                                this@MainActivity,
+                                R.drawable.ic_edit
+                        ),
+                        Color.parseColor("#127512"), Color.parseColor("#ffffff"),
+                        UnderlayButtonClickListener { pos: Int ->
+
+                            var editText = EditText(this@MainActivity)
+                            editText.setText(lista[pos])
+
+                            val builder = AlertDialog.Builder(this@MainActivity)
+                            builder.setTitle("Actualizar")
+                            builder.setCancelable(true)
+                            builder.setView(editText)
+
+                            builder.setNegativeButton("Cancelar", DialogInterface.OnClickListener{dialog, which ->
+                                lista.clear()
+                                lista.addAll(lenguages)
+                                recyclerView.adapter!!.notifyDataSetChanged()
+                            })
+
+                            builder.setPositiveButton("Aceptar", DialogInterface.OnClickListener{dialog, which ->
+                                lista[pos] = editText.text.toString()
+                                recyclerView.adapter!!.notifyItemChanged(pos)
+                            })
+
+                            builder.show()
+                            recyclerAdaptador.notifyItemChanged(pos)
+                        }
+
+                ))
+
+
+            }
         }
+        ///////////////////////////// coso de botones ///////////////////////
+
+        } //ON CREATE
 
 
-    private var simpleCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)){
+/*    private var simpleCallback = object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP.or(ItemTouchHelper.DOWN),ItemTouchHelper.LEFT.or(ItemTouchHelper.RIGHT)){
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
@@ -126,7 +191,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    }
+    }*/
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
